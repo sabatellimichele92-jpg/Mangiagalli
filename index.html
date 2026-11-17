@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="it" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Una mano se il ricovero non era previsto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a printed leaflet on screen. One white column, thin rules, teal labels, no cards. Same look as the paper trifold. */
+:root{
+  --paper:#ffffff; --ink:#12262e; --muted:#3d5159; --accent:#0a6a70; --tint:#d9ecec; --warn:#a04e00; --warn-soft:#fbeeda; --rule:#b9c6ca;
+  --display:"Bricolage Grotesque","Trebuchet MS","Noto Sans Arabic","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --body:"Public Sans","Noto Sans Arabic","PingFang SC","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;overflow-wrap:break-word;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px 56px}
+.langs{display:flex;flex-wrap:wrap;gap:4px 18px;padding:14px 0;border-bottom:1px solid var(--rule);font-size:15px}
+.langs button{font:inherit;background:none;border:0;padding:6px 0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.langs button[aria-pressed="true"]{color:var(--ink);font-weight:700;text-decoration:none}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cover{background:var(--tint);margin:0 -20px;padding:28px 20px 26px}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7a3b00;background:var(--warn-soft);padding:5px 10px}
+h1{font-family:var(--display);font-size:clamp(30px,8vw,46px);line-height:1.04;margin:18px 0 0;text-wrap:balance}
+.bar{width:64px;height:6px;background:var(--accent);margin:20px 0 16px}
+.lead{font-size:18px;font-weight:600;line-height:1.35;margin:0 0 14px;max-width:58ch}
+.meta{font-size:14px;margin:0}
+.index{list-style:none;margin:18px 0 0;padding:0;columns:2;column-gap:28px;font-size:15px}
+.index li{break-inside:avoid;padding:5px 0;border-bottom:1px solid var(--rule)}
+.index button{font:inherit;background:none;border:0;padding:4px 0;color:var(--ink);cursor:pointer;text-align:start;width:100%}
+.index b{color:var(--accent);display:inline-block;min-width:1.8em;font-variant-numeric:tabular-nums}
+section{padding-top:34px}
+.label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h2{font-family:var(--display);font-size:28px;line-height:1.08;margin:4px 0 6px;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;margin:0 0 10px}
+h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin:20px 0 2px}
+p{margin:0 0 10px}
+a{color:var(--accent)}
+ul.plain{margin:0 0 10px;padding-inline-start:20px}
+ul.plain li{margin-bottom:7px}
+ol.steps{list-style:none;margin:10px 0 0;padding:0;counter-reset:s;display:grid;gap:12px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:10px}
+ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;background:var(--tint);color:var(--accent);font-weight:700;font-size:14px;display:grid;place-items:center}
+.rows{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--rule)}
+.rows li{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:9px 0;border-top:1px solid var(--rule)}
+.rows .d{grid-column:1/2;font-size:15px}
+.rows .h{grid-column:1/2;font-size:14px;color:var(--muted)}
+.rows .w{grid-row:1/4;grid-column:2/3;text-align:end;font-weight:700;white-space:nowrap;font-size:15px}
+.rows .w a{display:block;font-weight:400;font-size:14px}
+.kv{border-bottom:1px solid var(--rule);margin:6px 0 12px}
+.kv div{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid var(--rule)}
+.kv b{text-align:end}
+.kv b>bdi:only-child{white-space:nowrap}
+.note{background:var(--warn-soft);border-inline-start:4px solid var(--warn);padding:11px 13px;margin:12px 0;font-size:16px}
+footer{margin-top:36px;padding-top:14px;border-top:2px solid var(--ink);font-size:14px;color:var(--muted)}
+bdi{font-variant-numeric:tabular-nums}
+@media (max-width:420px){.index{columns:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="langs" id="langs" role="group" aria-label="Lingua / Language"></div>
+<div id="app"></div>
+</div>
+<script>
+var LANGS=["it","en","fr","ar","zh"];
+var LNAME=["Italiano","English","Français","العربية","中文"];
+var DAYS=[["lun","mar","mer","gio","ven","sab","dom"],["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],["lun","mar","mer","jeu","ven","sam","dim"],["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد"],["周一","周二","周三","周四","周五","周六","周日"]];
+var S={
+tag:["Consigli tra familiari · non ufficiale","Tips from families · unofficial","Conseils entre familles · non officiel","نصائح من عائلات المرضى · غير رسمي","家属互助提示 · 非官方"],
+h1:["Una mano se il ricovero non era previsto","A helping hand when the hospital stay wasn't planned","Un coup de main quand l'hospitalisation n'était pas prévue","يد العون عندما لا يكون دخول المستشفى مخططًا له","临时住院时的实用帮手"],
+lead:["Consigli pratici per chi deve fermarsi alla Clinica Mangiagalli di Milano senza averlo programmato: cosa fare subito, dove trovare l'essenziale, dove mangiare, come arrivare e come gestire auto e Area C.","Practical tips for anyone who has to stay at the Mangiagalli Clinic in Milan without having planned it: what to do first, where to find essentials, where to eat, how to get there and how to handle the car and Area C.","Des conseils pratiques pour celles et ceux qui doivent rester à la Clinique Mangiagalli de Milan sans l'avoir prévu : que faire tout de suite, où trouver l'essentiel, où manger, comment venir et comment gérer la voiture et l'Area C.","نصائح عملية لكل من يضطر إلى البقاء في عيادة مانجاغالي في ميلانو دون تخطيط مسبق: ماذا تفعل أولًا، وأين تجد الضروريات، وأين تأكل، وكيف تصل، وكيف تتعامل مع السيارة والمنطقة C.","为需要临时在米兰 Mangiagalli 医院住院的人提供实用提示：先做什么、去哪里买必需品、去哪里吃饭、怎么到达，以及开车和 Area C 怎么办。"],
+meta:["Via della Commenda 12, Milano · Verificato il 14 novembre 2026","Via della Commenda 12, Milan · Checked on 14 November 2026","Via della Commenda 12, Milan · Vérifié le 14 novembre 2026","Via della Commenda 12، ميلانو · تم التحقق في 14 نوفمبر 2026","Via della Commenda 12，米兰 · 核实日期：2026年11月14日"],
+every:["tutti i giorni","daily","tous les jours","يوميًا","每天"],
+h24:["aperta 24 ore","open 24 hours","ouverte 24 h/24","مفتوحة 24 ساعة","24小时营业"],
+min:["min","min","min","د","分钟"],
+map:["Indicazioni","Directions","Itinéraire","الاتجاهات","路线"],
+t1:["Le prime due ore","The first two hours","Les deux premières heures","أول ساعتين","最初两小时"],
+t2:["Cosa serve e dove comprarlo","What you need and where to buy it","Ce qu'il faut et où l'acheter","ما تحتاجه وأين تشتريه","需要什么、去哪里买"],
+t3:["Mangiare e bere","Food and drink","Manger et boire","الطعام والشراب","吃饭喝水"],
+t4:["Di notte e nei festivi","At night and on holidays","La nuit et les jours fériés","ليلًا وفي العطلات","夜间和节假日"],
+t5:["Auto: Area C e parcheggio","By car: Area C and parking","En voiture : Area C et stationnement","بالسيارة: المنطقة C ومواقف السيارات","开车：Area C 与停车"],
+t6:["Mezzi pubblici e taxi","Public transport and taxis","Transports en commun et taxis","المواصلات العامة وسيارات الأجرة","公共交通与出租车"],
+t7:["Per chi arriva da fuori","For relatives coming from elsewhere","Pour les proches qui viennent de loin","للأقارب القادمين من خارج المدينة","从外地赶来的亲友"],
+t8:["Dove dormire","Where to sleep","Où dormir","أين تنام","住宿"],
+t9:["In reparto: visite","On the ward: visiting","Dans le service : visites","في القسم: الزيارات","病房探视"],
+t10:["Numeri utili","Useful numbers","Numéros utiles","أرقام مفيدة","常用电话"],
+s1a:["<b>Sei arrivato in auto in un giorno feriale?</b> Sei dentro Area C. Hai tempo fino a domani alle 23:59 per pagare il ticket o chiedere l'esenzione.","<b>Did you drive here on a weekday?</b> You are inside Area C. You have until 23:59 tomorrow to pay the charge or ask for the exemption.","<b>Vous êtes venu en voiture un jour de semaine ?</b> Vous êtes dans l'Area C. Vous avez jusqu'à demain 23 h 59 pour payer le ticket ou demander l'exonération.","<b>هل جئت بالسيارة في يوم عمل؟</b> أنت داخل المنطقة C. أمامك حتى الساعة 23:59 من يوم الغد لدفع الرسم أو طلب الإعفاء.","<b>工作日开车来的？</b>你已进入 Area C 收费区。最迟明天23:59前缴费或申请豁免。"],
+s1b:["<b>Chiedi al personale</b> cosa serve, se l'accompagnatore può restare e quali sono gli orari di visita del reparto.","<b>Ask the staff</b> what is needed, whether a companion can stay, and the ward's visiting hours.","<b>Demandez au personnel</b> ce qu'il faut, si l'accompagnant peut rester et les horaires de visite du service.","<b>اسأل الطاقم</b> عمّا يلزم، وهل يمكن للمرافق البقاء، وما هي مواعيد الزيارة في القسم.","<b>询问医护人员</b>需要准备什么、陪护人能否留下、病房探视时间。"],
+s1c:["<b>Recupera documenti e farmaci:</b> documento d'identità, tessera sanitaria, referti ed esami precedenti, elenco dei farmaci abituali.","<b>Get documents and medicines:</b> ID, health card, previous reports and test results, a list of regular medicines.","<b>Récupérez documents et médicaments :</b> pièce d'identité, carte de santé, comptes rendus et examens antérieurs, liste des médicaments habituels.","<b>أحضر الوثائق والأدوية:</b> بطاقة الهوية، البطاقة الصحية، التقارير والفحوصات السابقة، قائمة الأدوية المعتادة.","<b>准备证件和药品：</b>身份证件、医保卡、以往的病历和检查报告、日常用药清单。"],
+s1d:["<b>Compra l'essenziale:</b> pigiama o camicia da notte, ciabatte, biancheria, spazzolino, dentifricio, sapone, caricabatterie.","<b>Buy the essentials:</b> pyjamas or nightdress, slippers, underwear, toothbrush, toothpaste, soap, phone charger.","<b>Achetez l'essentiel :</b> pyjama ou chemise de nuit, chaussons, sous-vêtements, brosse à dents, dentifrice, savon, chargeur.","<b>اشترِ الضروريات:</b> بيجامة أو قميص نوم، شبشب، ملابس داخلية، فرشاة ومعجون أسنان، صابون، شاحن هاتف.","<b>购买必需品：</b>睡衣或睡裙、拖鞋、内衣、牙刷、牙膏、肥皂、手机充电器。"],
+s1e:["<b>Certificato di malattia INPS:</b> se chi è ricoverato lavora, chiedilo al medico al momento del ricovero o entro 24 ore. Alla dimissione non viene rilasciato.","<b>INPS sick-leave certificate:</b> if the patient is employed, ask the doctor for it on admission or within 24 hours. It cannot be issued at discharge.","<b>Certificat de maladie INPS :</b> si la personne hospitalisée travaille, demandez-le au médecin dès l'admission ou dans les 24 heures. Il ne peut pas être délivré à la sortie.","<b>شهادة المرض من INPS:</b> إذا كان المريض يعمل، اطلبها من الطبيب عند الدخول أو خلال 24 ساعة. لا يمكن إصدارها عند الخروج.","<b>INPS 病假证明：</b>如果住院者有工作，请在入院时或24小时内向医生索取。出院时无法开具。"],
+s1f:["<b>Avvisa famiglia e lavoro, poi mangia qualcosa.</b> Il bar più vicino è a due minuti a piedi.","<b>Tell family and work, then eat something.</b> The nearest café is a two-minute walk.","<b>Prévenez la famille et le travail, puis mangez quelque chose.</b> Le café le plus proche est à deux minutes à pied.","<b>أبلغ العائلة والعمل، ثم تناول شيئًا.</b> أقرب مقهى على بعد دقيقتين سيرًا.","<b>通知家人和单位，然后吃点东西。</b>最近的咖啡馆步行两分钟。"],
+s2sub:["Minuti a piedi dall'ingresso di via della Commenda 12. Gli orari sono indicativi: tocca Indicazioni per percorso e orari aggiornati.","Walking minutes from the entrance at via della Commenda 12. Opening hours are indicative: tap Directions for the route and current hours.","Minutes à pied depuis l'entrée de via della Commenda 12. Les horaires sont indicatifs : touchez Itinéraire pour le trajet et les horaires à jour.","الدقائق سيرًا من مدخل via della Commenda 12. المواعيد تقريبية: اضغط على الاتجاهات لمعرفة الطريق والمواعيد الحالية.","步行分钟数从 via della Commenda 12 入口算起。营业时间仅供参考，请点“路线”查看路线和最新营业时间。"],
+g_in:["Dentro l'ospedale","Inside the hospital","Dans l'hôpital","داخل المستشفى","医院内"],
+barin:["<b>Bar della Mangiagalli.</b> Ci si arriva anche dall'interno dell'ospedale, al piano -1 della scala D. Oltre a caffè e panini vende spazzolino, dentifricio e shampoo.","<b>The Mangiagalli café.</b> You can also reach it from inside the hospital, on floor -1 of staircase D. Besides coffee and sandwiches it sells toothbrushes, toothpaste and shampoo.","<b>Le bar de la Mangiagalli.</b> On y accède aussi de l'intérieur de l'hôpital, au niveau -1 de l'escalier D. En plus du café et des sandwichs, il vend brosses à dents, dentifrice et shampoing.","<b>مقهى مانجاغالي.</b> يمكن الوصول إليه أيضًا من داخل المستشفى، في الطابق ‎-1 من الدرج D. إضافة إلى القهوة والسندويشات يبيع فرش الأسنان والمعجون والشامبو.","<b>Mangiagalli 院内咖啡吧。</b>也可从医院内部到达：D 号楼梯 -1 层。除咖啡和三明治外，还出售牙刷、牙膏和洗发水。"],
+g_near:["A pochi passi","A few steps away","À deux pas","على بعد خطوات","几步之遥"],
+g_pharm:["Farmacie","Pharmacies","Pharmacies","الصيدليات","药店"],
+g_super:["Supermercati","Supermarkets","Supermarchés","السوبرماركت","超市"],
+g_cloth:["Pigiama e biancheria","Pyjamas and underwear","Pyjamas et sous-vêtements","البيجامات والملابس الداخلية","睡衣和内衣"],
+d_technor:["Ortopedia: ciabatte e calzature comode.","Orthopaedic shop: slippers and comfortable footwear.","Magasin d'orthopédie : chaussons et chaussures confortables.","متجر مستلزمات طبية: شباشب وأحذية مريحة.","医疗用品店：拖鞋和舒适鞋。"],
+d_pharm:["Prodotti per l'igiene, spazzolino, dentifricio.","Toiletries, toothbrush, toothpaste.","Produits d'hygiène, brosse à dents, dentifrice.","مستلزمات النظافة، فرشاة ومعجون أسنان.","洗漱用品、牙刷、牙膏。"],
+d_super:["Acqua, snack, sapone, fazzoletti.","Water, snacks, soap, tissues.","Eau, en-cas, savon, mouchoirs.","ماء، وجبات خفيفة، صابون، مناديل.","水、零食、肥皂、纸巾。"],
+d_intim:["Pigiami e intimo.","Pyjamas and underwear.","Pyjamas et lingerie.","بيجامات وملابس داخلية.","睡衣和内衣。"],
+d_ovs:["Grande magazzino: abbigliamento, pigiami, intimo.","Department store: clothing, pyjamas, underwear.","Grand magasin : vêtements, pyjamas, sous-vêtements.","متجر كبير: ملابس، بيجامات، ملابس داخلية.","百货店：服装、睡衣、内衣。"],
+n_pharm:["La farmacia interna del Policlinico distribuisce solo farmaci ospedalieri: non vende prodotti da banco.","The hospital's own pharmacy only dispenses hospital medicines: it does not sell over-the-counter products.","La pharmacie interne de l'hôpital ne délivre que des médicaments hospitaliers : elle ne vend pas de produits courants.","صيدلية المستشفى الداخلية تصرف أدوية المستشفى فقط ولا تبيع المنتجات العادية.","医院内部药房只发放医院处方药，不出售日常用品。"],
+s3sub:["Dentro la Mangiagalli c'è un bar. Fuori, tutto a pochi minuti a piedi:","There is a café inside the Mangiagalli. Outside, all within a few minutes' walk:","Il y a un bar à l'intérieur de la Mangiagalli. Dehors, tout est à quelques minutes à pied :","يوجد مقهى داخل مانجاغالي. وفي الخارج، كل شيء على بعد دقائق سيرًا:","Mangiagalli 院内有咖啡吧。院外步行几分钟可到："],
+g_caf:["Colazione e caffè","Breakfast and coffee","Petit-déjeuner et café","الفطور والقهوة","早餐和咖啡"],
+g_quick:["Pranzo veloce e leggero","Quick, light lunch","Déjeuner rapide et léger","غداء سريع وخفيف","快捷清淡午餐"],
+g_veg:["Tutto vegetale","Fully plant-based","100 % végétal","نباتي بالكامل","纯素食"],
+g_sit:["Seduti a tavola","A sit-down meal","Un vrai repas à table","وجبة على المائدة","坐下来吃一顿"],
+d_ghe:["Caffè, brioche al pistacchio, panini al roast beef.","Coffee, pistachio croissants, roast beef sandwiches.","Café, brioches à la pistache, sandwichs au rosbif.","قهوة، كرواسون بالفستق، سندويشات روست بيف.","咖啡、开心果牛角包、烤牛肉三明治。"],
+d_sbar:["Caffè, pasticcini e panini.","Coffee, small pastries and sandwiches.","Café, petites pâtisseries et sandwichs.","قهوة، معجنات صغيرة وسندويشات.","咖啡、小点心和三明治。"],
+d_pan:["Cornetti alla crema, pizzette, crostate.","Cream-filled croissants, mini pizzas, jam tarts.","Croissants à la crème, mini-pizzas, tartes.","كرواسون بالكريمة، بيتزا صغيرة، فطائر.","奶油牛角包、迷你披萨、果酱挞。"],
+d_pave:["Brioche farcite, avocado toast, caffè. Aperto anche la domenica.","Filled croissants, avocado toast, coffee. Open on Sundays too.","Brioches fourrées, toast à l'avocat, café. Ouvert aussi le dimanche.","كرواسون محشو، توست بالأفوكادو، قهوة. مفتوح يوم الأحد أيضًا.","夹心牛角包、牛油果吐司、咖啡。周日也营业。"],
+d_forno:["Focaccia pugliese, pane fresco, dolci da forno.","Apulian focaccia, fresh bread, baked sweets.","Focaccia des Pouilles, pain frais, gâteaux.","فوكاتشا على طريقة بوليا، خبز طازج، حلويات مخبوزة.","普利亚式佛卡夏、新鲜面包、烘焙甜点。"],
+d_poke:["Poke componibili: riso, pesce o tofu, verdure.","Build-your-own poke bowls: rice, fish or tofu, vegetables.","Poke bowls à composer : riz, poisson ou tofu, légumes.","أطباق بوكي حسب الطلب: أرز، سمك أو توفو، خضار.","自选波奇饭：米饭、鱼或豆腐、蔬菜。"],
+d_viva:["Insalate, piatti pronti da scaldare, quiche di verdure, frullati.","Salads, ready meals heated on request, vegetable quiche, smoothies.","Salades, plats prêts à réchauffer, quiche aux légumes, smoothies.","سلطات، أطباق جاهزة تُسخَّن، كيش بالخضار، عصائر سموذي.","沙拉、可加热的现成餐、蔬菜咸派、果昔。"],
+d_cec:["Focacce farcite, calde o fredde, tutte senza ingredienti animali.","Filled focaccia, hot or cold, all free of animal ingredients.","Focaccias garnies, chaudes ou froides, sans aucun ingrédient animal.","فوكاتشا محشوة، ساخنة أو باردة، كلها خالية من المكونات الحيوانية.","夹馅佛卡夏，冷热皆有，全部不含动物成分。"],
+d_vg:["Cucina milanese: risotto, ossobuco, cotoletta, ravioli di zucca.","Milanese cooking: risotto, ossobuco, breaded veal cutlet, pumpkin ravioli.","Cuisine milanaise : risotto, osso buco, escalope panée, raviolis au potiron.","مطبخ ميلانو: ريزوتو، أوسوبوكو، كوتوليتا، رافيولي باليقطين.","米兰菜：烩饭、炖小牛膝、炸小牛排、南瓜饺。"],
+d_ge:["Pizza napoletana e pasta del giorno.","Neapolitan pizza and pasta of the day.","Pizza napolitaine et pâtes du jour.","بيتزا نابولية وباستا اليوم.","那不勒斯披萨和每日意面。"],
+d_jj:["Pizza e cucina napoletana.","Pizza and Neapolitan dishes.","Pizza et cuisine napolitaine.","بيتزا ومأكولات نابولية.","披萨和那不勒斯菜。"],
+d_cc:["Pizza, pasta e piatti italiani.","Pizza, pasta and Italian dishes.","Pizza, pâtes et plats italiens.","بيتزا، باستا وأطباق إيطالية.","披萨、意面和意大利菜。"],
+n_food:["<b>Cibo in reparto.</b> L'ospedale non permette di farsi consegnare cibi o bevande dall'esterno con servizi di food delivery, né di conservare avanzi in stanza.","<b>Food on the ward.</b> The hospital does not allow food or drink to be delivered from outside by delivery services, nor leftovers to be kept in the room.","<b>Nourriture dans le service.</b> L'hôpital n'autorise pas la livraison de repas ou de boissons de l'extérieur, ni la conservation de restes dans la chambre.","<b>الطعام في القسم.</b> لا يسمح المستشفى بتوصيل الطعام أو المشروبات من الخارج عبر خدمات التوصيل، ولا بحفظ بقايا الطعام في الغرفة.","<b>病房内饮食。</b>医院不允许通过外卖服务从院外送餐或饮料，也不允许在病房内存放剩余食物。"],
+s4a:["<b>Dopo le 21:</b> Carrefour Market di via Bergamo fino all'1, Farmacia Foglia fino alle 24, Farmacia Ferrarini sempre aperta.","<b>After 9 pm:</b> Carrefour Market in via Bergamo until 1 am, Farmacia Foglia until midnight, Farmacia Ferrarini always open.","<b>Après 21 h :</b> Carrefour Market de via Bergamo jusqu'à 1 h, Farmacia Foglia jusqu'à minuit, Farmacia Ferrarini toujours ouverte.","<b>بعد الساعة 9 مساءً:</b> Carrefour Market في via Bergamo حتى 1 صباحًا، Farmacia Foglia حتى منتصف الليل، Farmacia Ferrarini مفتوحة دائمًا.","<b>晚上9点后：</b>via Bergamo 的 Carrefour Market 营业至凌晨1点，Farmacia Foglia 至午夜，Farmacia Ferrarini 全天营业。"],
+s4b:["<b>Domenica:</b> molti bar di via della Commenda sono chiusi. Aperti Pavè Break (fino alle 16), Poke House a pranzo, le pizzerie e i supermercati.","<b>Sunday:</b> many cafés in via della Commenda are closed. Open: Pavè Break (until 4 pm), Poke House at lunchtime, the pizzerias and the supermarkets.","<b>Dimanche :</b> beaucoup de bars de via della Commenda sont fermés. Ouverts : Pavè Break (jusqu'à 16 h), Poke House le midi, les pizzerias et les supermarchés.","<b>الأحد:</b> كثير من مقاهي via della Commenda مغلقة. المفتوح: Pavè Break (حتى 4 مساءً)، Poke House وقت الغداء، مطاعم البيتزا والسوبرماركت.","<b>周日：</b>via della Commenda 的许多咖啡馆休息。营业的有 Pavè Break（至16点）、Poke House（午餐时段）、披萨店和超市。"],
+s4c:["<b>Area C:</b> sabato, domenica e festivi non si paga.","<b>Area C:</b> no charge on Saturdays, Sundays and public holidays.","<b>Area C :</b> gratuit le samedi, le dimanche et les jours fériés.","<b>المنطقة C:</b> لا رسوم أيام السبت والأحد والعطلات الرسمية.","<b>Area C：</b>周六、周日和公共假日不收费。"],
+s4d:["<b>Mezzi di notte:</b> linee sostitutive NM1, NM2 e NM3 alla fermata Sforza-Policlinico.","<b>Night transport:</b> night bus lines NM1, NM2 and NM3 at the Sforza-Policlinico stop.","<b>Transports de nuit :</b> lignes de bus NM1, NM2 et NM3 à l'arrêt Sforza-Policlinico.","<b>المواصلات ليلًا:</b> خطوط الحافلات الليلية NM1 وNM2 وNM3 عند موقف Sforza-Policlinico.","<b>夜间交通：</b>夜班巴士 NM1、NM2、NM3，在 Sforza-Policlinico 站。"],
+s5sub:["La Mangiagalli è dentro Area C, la zona a traffico limitato del centro di Milano.","The Mangiagalli is inside Area C, the restricted traffic zone of central Milan.","La Mangiagalli se trouve dans l'Area C, la zone à circulation restreinte du centre de Milan.","تقع مانجاغالي داخل المنطقة C، وهي منطقة المرور المقيّد في وسط ميلانو.","Mangiagalli 位于 Area C，即米兰市中心的交通限行收费区。"],
+k_on:["Quando è attiva","When it applies","Quand elle s'applique","متى تُطبَّق","生效时间"],
+v_on:["lun–ven 7:30–19:30. Sabato, domenica, festivi e fuori orario: gratis","Mon–Fri 7:30–19:30. Saturdays, Sundays, public holidays and outside these hours: free","lun–ven 7 h 30–19 h 30. Samedi, dimanche, jours fériés et hors horaires : gratuit","الاثنين–الجمعة 7:30–19:30. السبت والأحد والعطلات الرسمية وخارج هذه الساعات: مجانًا","周一至周五 7:30–19:30。周六、周日、公共假日及其他时段：免费"],
+k_tk:["Ticket giornaliero (entri ed esci quante volte vuoi)","Daily charge (enter and leave as often as you like)","Ticket journalier (entrées et sorties illimitées)","الرسم اليومي (ادخل واخرج بقدر ما تشاء)","每日通行费（当天可多次进出）"],
+k_dl:["Da pagare e attivare entro","Pay and activate by","À payer et activer avant","يُدفع ويُفعَّل قبل","缴费并激活的期限"],
+v_dl:["ore 23:59 del giorno dopo l'ingresso<br><i style=\"font-weight:400;font-size:14px\">Esempio: entri lunedì alle 10:00 → paghi entro martedì alle 23:59</i>","23:59 on the day after you enter<br><i style=\"font-weight:400;font-size:14px\">Example: you enter on Monday at 10:00 → pay by Tuesday at 23:59</i>","23 h 59 le lendemain de l'entrée<br><i style=\"font-weight:400;font-size:14px\">Exemple : entrée le lundi à 10 h → paiement avant mardi 23 h 59</i>","الساعة 23:59 من اليوم التالي للدخول<br><i style=\"font-weight:400;font-size:14px\">مثال: تدخل يوم الاثنين الساعة 10:00 ← تدفع قبل الساعة 23:59 يوم الثلاثاء</i>","进入后次日23:59前<br><i style=\"font-weight:400;font-size:14px\">例如：周一10:00进入 → 须在周二23:59前缴费</i>"],
+k_lt:["Dimenticato? Entro 7 giorni, solo online su MyAreaC","Forgot? Within 7 days, online only on MyAreaC","Oublié ? Sous 7 jours, uniquement en ligne sur MyAreaC","نسيت؟ خلال 7 أيام، عبر الإنترنت فقط على MyAreaC","忘记了？7天内补缴，仅限 MyAreaC 网上办理"],
+k_gr:["Ridotto, se sosti più di un'ora in un'autorimessa convenzionata: si compra alla cassa e va attivato entro le 23:59 dello stesso giorno","Reduced, if you park for over an hour in a participating garage: buy it at the till and activate it by 23:59 the same day","Réduit, si vous stationnez plus d'une heure dans un garage conventionné : à acheter à la caisse et à activer avant 23 h 59 le jour même","مخفَّض إذا ركنت أكثر من ساعة في مرآب متعاقد: يُشترى من الصندوق ويجب تفعيله قبل الساعة 23:59 من اليوم نفسه","在合作车库停车超过一小时的优惠价：在收银处购买，须在当天23:59前激活"],
+s5pay:["<b>Pagare non basta: va attivato.</b> Il ticket si collega alla targa con il suo codice PIN, online o al 02 4868 4001 (tutti i giorni 7–24). Si compra online su MyAreaC, ai parcometri, nei bancomat Intesa Sanpaolo e nei punti Sisal e LIS. Con Telepass o UnipolMove, se hai attivato il servizio, l'addebito è automatico.","<b>Paying is not enough: it must be activated.</b> The charge is linked to your number plate with its PIN code, online or on 02 4868 4001 (daily 7:00–24:00). Buy it online on MyAreaC, at parking meters, at Intesa Sanpaolo cash machines and at Sisal and LIS points. With Telepass or UnipolMove, if you have activated the service, it is charged automatically.","<b>Payer ne suffit pas : il faut l'activer.</b> Le ticket se relie à la plaque avec son code PIN, en ligne ou au 02 4868 4001 (tous les jours 7 h–24 h). Il s'achète en ligne sur MyAreaC, aux parcmètres, aux distributeurs Intesa Sanpaolo et dans les points Sisal et LIS. Avec Telepass ou UnipolMove, si le service est activé, le prélèvement est automatique.","<b>الدفع وحده لا يكفي: يجب التفعيل.</b> يُربط الرسم بلوحة السيارة عبر رمز PIN، عبر الإنترنت أو على الرقم 02 4868 4001 (يوميًا 7:00–24:00). يُشترى عبر الإنترنت على MyAreaC، أو من عدادات المواقف، أو صرافات Intesa Sanpaolo، أو نقاط Sisal وLIS. مع Telepass أو UnipolMove، إذا فعّلت الخدمة، يُخصم المبلغ تلقائيًا.","<b>仅付款不够，还必须激活。</b>用通行券上的 PIN 码将其绑定车牌，可在网上或拨打 02 4868 4001（每天7:00–24:00）办理。可在 MyAreaC 网上、停车咪表、Intesa Sanpaolo 自动取款机以及 Sisal 和 LIS 网点购买。使用 Telepass 或 UnipolMove 并已开通该服务的，会自动扣费。"],
+s5ex:["<b>Esenzione.</b> Il Comune esenta dal ticket le auto usate per portare una persona al Pronto Soccorso e quelle dei genitori di neonati in terapia intensiva neonatale. Si chiede con il Modulo 06, da inviare a mta.ufficioAreaC@comune.milano.it entro le 23:59 del giorno dopo l'ingresso. Conserva il verbale del Pronto Soccorso.","<b>Exemption.</b> The City exempts cars used to take someone to the Emergency Department, and those of parents of newborns in neonatal intensive care. Request it with Form 06 (Modulo 06), emailed to mta.ufficioAreaC@comune.milano.it by 23:59 on the day after entry. Keep the Emergency Department report.","<b>Exonération.</b> La Ville exonère les voitures utilisées pour conduire une personne aux urgences et celles des parents de nouveau-nés en soins intensifs néonatals. La demande se fait avec le formulaire 06 (Modulo 06), à envoyer à mta.ufficioAreaC@comune.milano.it avant 23 h 59 le lendemain de l'entrée. Conservez le compte rendu des urgences.","<b>الإعفاء.</b> تعفي البلدية السيارات المستخدمة لنقل شخص إلى الطوارئ وسيارات آباء المواليد في العناية المركزة لحديثي الولادة. يُطلب بالنموذج 06 (Modulo 06) ويُرسل إلى mta.ufficioAreaC@comune.milano.it قبل الساعة 23:59 من اليوم التالي للدخول. احتفظ بتقرير الطوارئ.","<b>豁免。</b>送人到急诊的车辆，以及新生儿重症监护患儿父母的车辆，可免缴通行费。需填写 06 号表格（Modulo 06），在进入次日23:59前发送至 mta.ufficioAreaC@comune.milano.it。请保留急诊记录。"],
+s5ban:["Le auto più inquinanti non possono entrare neanche pagando: verifica la targa sul sito del Comune.","The most polluting cars cannot enter even by paying: check your plate on the City website.","Les voitures les plus polluantes ne peuvent pas entrer, même en payant : vérifiez votre plaque sur le site de la Ville.","السيارات الأكثر تلويثًا لا يُسمح لها بالدخول حتى مع الدفع: تحقق من لوحتك على موقع البلدية.","高排放车辆即使缴费也不得进入：请在市政府网站查询车牌。"],
+g_park:["Dove parcheggiare","Where to park","Où stationner","أين تركن","停车地点"],
+d_park:["Angolo via della Commenda. 3 € l'ora per le prime 4 ore, poi 1 € l'ora, massimo 24 € al giorno. Convenzionato: alla cassa vendono il ticket Area C a 4,50 €.","Corner of via della Commenda. €3 an hour for the first 4 hours, then €1 an hour, €24 a day at most. Participating garage: the till sells the Area C charge at €4.50.","Angle via della Commenda. 3 € l'heure les 4 premières heures, puis 1 € l'heure, 24 € par jour maximum. Conventionné : la caisse vend le ticket Area C à 4,50 €.","عند زاوية via della Commenda. 3 يورو للساعة في أول 4 ساعات، ثم 1 يورو للساعة، بحد أقصى 24 يورو في اليوم. مرآب متعاقد: يُباع رسم المنطقة C عند الصندوق بـ 4.50 يورو.","位于 via della Commenda 路口。前4小时每小时3欧元，之后每小时1欧元，每天最高24欧元。合作车库：收银处出售4.50欧元的 Area C 通行费。"],
+s5next:["Nei giorni successivi conviene lasciare l'auto fuori dal centro e arrivare in metropolitana.","On the following days it is easier to leave the car outside the centre and come by metro.","Les jours suivants, mieux vaut laisser la voiture hors du centre et venir en métro.","في الأيام التالية الأفضل ترك السيارة خارج وسط المدينة والقدوم بالمترو.","之后几天建议把车停在市中心外，乘地铁前来。"],
+s6a:["<b>M4 (blu):</b> fermata Sforza-Policlinico, la più comoda.","<b>M4 (blue):</b> Sforza-Policlinico station, the most convenient.","<b>M4 (bleue) :</b> station Sforza-Policlinico, la plus pratique.","<b>M4 (الأزرق):</b> محطة Sforza-Policlinico، وهي الأنسب.","<b>M4（蓝线）：</b>Sforza-Policlinico 站，最方便。"],
+s6b:["<b>M3 (gialla):</b> fermata Crocetta.","<b>M3 (yellow):</b> Crocetta station.","<b>M3 (jaune) :</b> station Crocetta.","<b>M3 (الأصفر):</b> محطة Crocetta.","<b>M3（黄线）：</b>Crocetta 站。"],
+s6c:["<b>Bus e tram:</b> bus 96 e 97 a Sforza-Policlinico; bus 65 e tram 16 e 24 in via Lamarmora.","<b>Bus and tram:</b> buses 96 and 97 at Sforza-Policlinico; bus 65 and trams 16 and 24 in via Lamarmora.","<b>Bus et tram :</b> bus 96 et 97 à Sforza-Policlinico ; bus 65 et trams 16 et 24 via Lamarmora.","<b>الحافلة والترام:</b> الحافلتان 96 و97 عند Sforza-Policlinico؛ الحافلة 65 والترام 16 و24 في via Lamarmora.","<b>公交和电车：</b>96、97路公交到 Sforza-Policlinico；65路公交及16、24路电车到 via Lamarmora。"],
+s6d:["<b>Biglietto:</b> si paga con carta contactless ai tornelli o con l'app ATM Milano.","<b>Ticket:</b> pay with a contactless card at the gates or with the ATM Milano app.","<b>Billet :</b> paiement par carte sans contact aux portillons ou avec l'appli ATM Milano.","<b>التذكرة:</b> ادفع ببطاقة لا تلامسية عند البوابات أو عبر تطبيق ATM Milano.","<b>车票：</b>在闸机刷非接触式银行卡，或使用 ATM Milano 应用购票。"],
+s6e:["<b>Taxi:</b> indirizzo da dare, via della Commenda 12.","<b>Taxi:</b> give the address via della Commenda 12.","<b>Taxi :</b> adresse à donner, via della Commenda 12.","<b>سيارة الأجرة:</b> أعطِ العنوان via della Commenda 12.","<b>出租车：</b>请报地址 via della Commenda 12。"],
+s7sub:["Da girare ai parenti.","To forward to relatives.","À transmettre aux proches.","لإرسالها إلى الأقارب.","可转发给亲友。"],
+r_lin:["Metro M4 direzione San Cristoforo, fermata Sforza-Policlinico.","Metro M4 towards San Cristoforo, get off at Sforza-Policlinico.","Métro M4 direction San Cristoforo, arrêt Sforza-Policlinico.","مترو M4 باتجاه San Cristoforo، محطة Sforza-Policlinico.","乘地铁 M4（San Cristoforo 方向），在 Sforza-Policlinico 站下车。"],
+r_mxp:["Treno Malpensa Express fino a Cadorna; M1 direzione Sesto FS fino a San Babila; M4 direzione San Cristoforo, fermata Sforza-Policlinico. Oppure treno fino a Centrale e M3 direzione San Donato, fermata Crocetta.","Malpensa Express train to Cadorna; M1 towards Sesto FS to San Babila; M4 towards San Cristoforo, get off at Sforza-Policlinico. Or train to Centrale and M3 towards San Donato, get off at Crocetta.","Train Malpensa Express jusqu'à Cadorna ; M1 direction Sesto FS jusqu'à San Babila ; M4 direction San Cristoforo, arrêt Sforza-Policlinico. Ou train jusqu'à Centrale puis M3 direction San Donato, arrêt Crocetta.","قطار Malpensa Express حتى Cadorna؛ ثم M1 باتجاه Sesto FS حتى San Babila؛ ثم M4 باتجاه San Cristoforo، محطة Sforza-Policlinico. أو القطار حتى Centrale ثم M3 باتجاه San Donato، محطة Crocetta.","乘 Malpensa Express 列车到 Cadorna；换 M1（Sesto FS 方向）到 San Babila；再换 M4（San Cristoforo 方向），在 Sforza-Policlinico 站下车。或乘列车到 Centrale，换 M3（San Donato 方向），在 Crocetta 站下车。"],
+r_bgy:["Bus fino a Milano Centrale; M3 direzione San Donato, fermata Crocetta.","Coach to Milano Centrale; M3 towards San Donato, get off at Crocetta.","Navette jusqu'à Milano Centrale ; M3 direction San Donato, arrêt Crocetta.","حافلة حتى Milano Centrale؛ ثم M3 باتجاه San Donato، محطة Crocetta.","乘机场大巴到 Milano Centrale；换 M3（San Donato 方向），在 Crocetta 站下车。"],
+r_cen:["Da Centrale: M3 direzione San Donato, fermata Crocetta. Da Rogoredo: M3 direzione Comasina, fermata Crocetta.","From Centrale: M3 towards San Donato, get off at Crocetta. From Rogoredo: M3 towards Comasina, get off at Crocetta.","De Centrale : M3 direction San Donato, arrêt Crocetta. De Rogoredo : M3 direction Comasina, arrêt Crocetta.","من Centrale: M3 باتجاه San Donato، محطة Crocetta. من Rogoredo: M3 باتجاه Comasina، محطة Crocetta.","从 Centrale：乘 M3（San Donato 方向），在 Crocetta 站下车。从 Rogoredo：乘 M3（Comasina 方向），在 Crocetta 站下车。"],
+r_cad:["M1 direzione Sesto FS fino a San Babila; M4 direzione San Cristoforo, fermata Sforza-Policlinico.","M1 towards Sesto FS to San Babila; M4 towards San Cristoforo, get off at Sforza-Policlinico.","M1 direction Sesto FS jusqu'à San Babila ; M4 direction San Cristoforo, arrêt Sforza-Policlinico.","M1 باتجاه Sesto FS حتى San Babila؛ ثم M4 باتجاه San Cristoforo، محطة Sforza-Policlinico.","乘 M1（Sesto FS 方向）到 San Babila；换 M4（San Cristoforo 方向），在 Sforza-Policlinico 站下车。"],
+n_cen:["Stazione Centrale, Rogoredo","Centrale and Rogoredo stations","Gares Centrale et Rogoredo","محطتا Centrale وRogoredo","Centrale、Rogoredo 火车站"],
+n_cad:["Stazione Cadorna","Cadorna station","Gare Cadorna","محطة Cadorna","Cadorna 火车站"],
+s8a:["<b>A Casa Lontani da Casa:</b> rete di alloggi a costo contenuto per pazienti e familiari che vengono a Milano per cure. Il Policlinico aderisce al progetto.","<b>A Casa Lontani da Casa:</b> a network of low-cost accommodation for patients and relatives who come to Milan for treatment. The hospital takes part in the project.","<b>A Casa Lontani da Casa :</b> réseau d'hébergements à prix modéré pour les patients et les proches qui viennent se faire soigner à Milan. L'hôpital participe au projet.","<b>A Casa Lontani da Casa:</b> شبكة مساكن منخفضة التكلفة للمرضى وذويهم القادمين إلى ميلانو للعلاج. المستشفى مشارك في المشروع.","<b>A Casa Lontani da Casa：</b>为来米兰就医的患者及家属提供的平价住宿网络。医院参与该项目。"],
+s8b:["<b>Hotel e appartamenti:</b> in via della Commenda e corso di Porta Vigentina ci sono diverse strutture a pochi minuti a piedi. Non sono convenzionate con l'ospedale.","<b>Hotels and apartments:</b> there are several in via della Commenda and corso di Porta Vigentina, a few minutes' walk away. They have no agreement with the hospital.","<b>Hôtels et appartements :</b> il y en a plusieurs via della Commenda et corso di Porta Vigentina, à quelques minutes à pied. Ils ne sont pas conventionnés avec l'hôpital.","<b>الفنادق والشقق:</b> يوجد عدد منها في via della Commenda وcorso di Porta Vigentina على بعد دقائق سيرًا. لا يوجد اتفاق بينها وبين المستشفى.","<b>酒店和公寓：</b>via della Commenda 和 corso di Porta Vigentina 有多家，步行几分钟。它们与医院没有合作协议。"],
+s8c:["<b>In reparto:</b> chiedi al personale se l'accompagnatore può fermarsi la notte.","<b>On the ward:</b> ask the staff whether a companion can stay overnight.","<b>Dans le service :</b> demandez au personnel si l'accompagnant peut rester la nuit.","<b>في القسم:</b> اسأل الطاقم هل يمكن للمرافق المبيت.","<b>病房内：</b>请询问医护人员陪护人能否过夜。"],
+s9sub:["Dal foglio «Regole di accesso dei visitatori» affisso in reparto (revisione del 4 maggio 2023). Le regole possono cambiare: chiedi sempre conferma in reparto.","From the «Visitor access rules» sheet posted on the ward (revision of 4 May 2023). Rules can change: always confirm with the ward.","D'après la fiche « Règles d'accès des visiteurs » affichée dans le service (révision du 4 mai 2023). Les règles peuvent changer : demandez toujours confirmation au service.","من ورقة «قواعد دخول الزوار» المعلّقة في القسم (مراجعة 4 مايو 2023). قد تتغير القواعد: تأكد دائمًا من القسم.","依据病房张贴的《访客探视规定》（2023年5月4日修订版）。规定可能变动，请务必向病房确认。"],
+k_gen:["Regola generale","General rule","Règle générale","القاعدة العامة","一般规定"],
+v_gen:["12–20, una persona alla volta (possibilmente sempre la stessa), un'ora al massimo","12:00–20:00, one person at a time (the same person if possible), one hour at most","12 h–20 h, une personne à la fois (si possible toujours la même), une heure maximum","12:00–20:00، شخص واحد في كل مرة (ويفضَّل الشخص نفسه)، ساعة على الأكثر","12:00–20:00，每次一人（尽量为同一人），最长一小时"],
+k_pue:["Puerperio e Patologia della gravidanza: partner o persona di riferimento","Postnatal and High-risk pregnancy wards: partner or support person","Suites de couches et Grossesses pathologiques : partenaire ou personne de référence","قسم ما بعد الولادة وقسم الحمل عالي الخطورة: الشريك أو الشخص المرافق","产后病房和高危妊娠病房：伴侣或指定陪伴人"],
+k_fam:["Stessi reparti: fratelli","Same wards: siblings","Mêmes services : frères et sœurs","القسمان نفسهما: الإخوة","上述病房：兄弟姐妹"],
+k_neo:["Neonatologia e Terapia intensiva neonatale: genitori","Neonatology and Neonatal intensive care: parents","Néonatologie et Soins intensifs néonatals : parents","قسم حديثي الولادة والعناية المركزة لحديثي الولادة: الوالدان","新生儿科和新生儿重症监护：父母"],
+v_neo:["24 ore su 24","24 hours a day","24 h/24","على مدار 24 ساعة","全天24小时"],
+k_kid:["Neonatologia e Terapia intensiva neonatale: fratelli e nonni","Neonatology and Neonatal intensive care: siblings and grandparents","Néonatologie et Soins intensifs néonatals : frères et sœurs, grands-parents","قسم حديثي الولادة والعناية المركزة لحديثي الولادة: الإخوة والأجداد","新生儿科和新生儿重症监护：兄弟姐妹和祖父母"],
+v_kid:["17:30–18:30, uno alla volta, massimo 45 minuti","17:30–18:30, one at a time, 45 minutes at most","17 h 30–18 h 30, un à la fois, 45 minutes maximum","17:30–18:30، واحد في كل مرة، 45 دقيقة على الأكثر","17:30–18:30，每次一人，最长45分钟"],
+v_fam:["12–20, massimo 45 minuti","12:00–20:00, 45 minutes at most","12 h–20 h, 45 minutes maximum","12:00–20:00، 45 دقيقة على الأكثر","12:00–20:00，最长45分钟"],
+s9mask:["Tutti i visitatori devono indossare la mascherina per l'intera visita.","All visitors must wear a face mask for the whole visit.","Tous les visiteurs doivent porter un masque pendant toute la visite.","على جميع الزوار ارتداء الكمامة طوال مدة الزيارة.","所有访客在探视期间必须全程佩戴口罩。"],
+s9val:["Lascia a casa gioielli e contanti: l'ospedale non risponde di furti o smarrimenti.","Leave jewellery and cash at home: the hospital is not liable for theft or loss.","Laissez bijoux et argent liquide à la maison : l'hôpital ne répond pas des vols ou des pertes.","اترك المجوهرات والنقود في البيت: المستشفى غير مسؤول عن السرقة أو الفقدان.","请将首饰和现金留在家中：医院不对失窃或遗失负责。"],
+k_112:["Emergenze","Emergencies","Urgences","الطوارئ","紧急求助"],
+k_sw:["Centralino Policlinico","Hospital switchboard","Standard de l'hôpital","بدّالة المستشفى","医院总机"],
+k_mr:["Ufficio cartelle cliniche","Medical records office","Bureau des dossiers médicaux","مكتب الملفات الطبية","病历办公室"],
+k_ac:["Assistenza Area C","Area C helpline","Assistance Area C","مساعدة المنطقة C","Area C 服务热线"],
+k_atm:["ATM, informazioni mezzi","ATM, public transport information","ATM, informations transports","ATM، معلومات المواصلات","ATM 公交咨询"],
+k_taxi:["Taxi","Taxi","Taxi","سيارات الأجرة","出租车"],
+s10ps:["Pronto Soccorso ostetrico-ginecologico: Clinica Mangiagalli, via della Commenda 12, aperto 24 ore su 24.","Obstetric and gynaecological Emergency Department: Mangiagalli Clinic, via della Commenda 12, open 24 hours a day.","Urgences obstétricales et gynécologiques : Clinique Mangiagalli, via della Commenda 12, ouvertes 24 h/24.","طوارئ النساء والتوليد: عيادة مانجاغالي، via della Commenda 12، مفتوحة على مدار 24 ساعة.","妇产科急诊：Mangiagalli 医院，via della Commenda 12，24小时开放。"],
+s5what:["Area C è la zona a traffico limitato del centro di Milano, e la Mangiagalli è dentro. Non ci sono sbarre: le telecamere ai varchi leggono la targa. Se entri in auto quando Area C è attiva devi pagare un ticket giornaliero, anche dopo essere entrato.","Area C is the restricted traffic zone of central Milan, and the Mangiagalli is inside it. There are no barriers: cameras at the entrances read your number plate. If you drive in while Area C is active you must pay a daily charge, which can also be paid after entering.","L'Area C est la zone à circulation restreinte du centre de Milan, et la Mangiagalli s'y trouve. Il n'y a pas de barrières : des caméras lisent la plaque aux entrées. Si vous entrez en voiture pendant les heures d'activation, vous devez payer un ticket journalier, même après être entré.","المنطقة C هي منطقة المرور المقيّد في وسط ميلانو، ومانجاغالي تقع داخلها. لا توجد حواجز: الكاميرات عند المداخل تقرأ لوحة السيارة. إذا دخلت بالسيارة خلال ساعات تفعيل المنطقة C فعليك دفع رسم يومي، ويمكن الدفع بعد الدخول أيضًا.","Area C 是米兰市中心的交通限行收费区，Mangiagalli 就在区内。入口没有栏杆：摄像头会识别车牌。在 Area C 生效时段开车进入，必须缴纳每日通行费，也可以在进入之后补缴。"],
+s5fine:["<b>Se non paghi.</b> Passati i 7 giorni arriva a casa del proprietario dell'auto una multa di 83 € più spese di notifica e il ticket non pagato: circa 110 € in tutto.","<b>If you don't pay.</b> After the 7 days a fine is sent to the car owner's home: €83 plus notification costs and the unpaid charge, about €110 in total.","<b>Si vous ne payez pas.</b> Passé le délai de 7 jours, une amende est envoyée au domicile du propriétaire du véhicule : 83 € plus les frais de notification et le ticket impayé, environ 110 € au total.","<b>إذا لم تدفع.</b> بعد انقضاء الأيام السبعة تُرسل إلى عنوان مالك السيارة غرامة قدرها 83 يورو، إضافة إلى رسوم الإخطار والرسم غير المدفوع: نحو 110 يورو إجمالًا.","<b>如果不缴费。</b>超过7天后，罚单会寄到车主住址：83欧元，另加通知费用和未缴的通行费，合计约110欧元。"],
+d_park2:["Autorimessa a pagamento. Tariffe da chiedere sul posto.","Paid garage. Ask for rates on site.","Garage payant. Tarifs à demander sur place.","مرآب مدفوع. اسأل عن الأسعار في المكان.","收费车库。价格请现场询问。"],
+s6f:["<b>Tariffe taxi:</b> da Malpensa tariffa fissa 114 €; da Orio al Serio tariffa fissa 128 €; da Linate a tassametro, in genere 20–35 €; in città a tassametro.","<b>Taxi fares:</b> from Malpensa a fixed fare of €114; from Orio al Serio a fixed fare of €128; from Linate on the meter, usually €20–35; within the city on the meter.","<b>Tarifs des taxis :</b> depuis Malpensa, forfait de 114 € ; depuis Orio al Serio, forfait de 128 € ; depuis Linate, au compteur, en général 20–35 € ; en ville, au compteur.","<b>أسعار سيارات الأجرة:</b> من مالبينسا سعر ثابت 114 يورو؛ من أوريو آل سيريو سعر ثابت 128 يورو؛ من ليناتي بالعداد، عادةً 20–35 يورو؛ داخل المدينة بالعداد.","<b>出租车费用：</b>从 Malpensa 机场固定价114欧元；从 Orio al Serio 机场固定价128欧元；从 Linate 机场打表，一般20–35欧元；市内打表计费。"],
+g_hyg:["Igiene: spazzolino, dentifricio, sapone","Toiletries: toothbrush, toothpaste, soap","Hygiène : brosse à dents, dentifrice, savon","النظافة: فرشاة ومعجون أسنان، صابون","洗漱：牙刷、牙膏、肥皂"],
+g_slip:["Ciabatte","Slippers","Chaussons","الشباشب","拖鞋"],
+g_water:["Acqua, snack e altro","Water, snacks and more","Eau, en-cas et autres","ماء ووجبات خفيفة وغيرها","水、零食及其他"],
+f1:["<b>Chi ha scritto questa guida.</b> Familiari di una paziente, dopo un ricovero non programmato. Non è un documento del Policlinico di Milano e non è stata approvata dall'ospedale. Nessun esercizio citato ha pagato per comparire.","<b>Who wrote this guide.</b> Relatives of a patient, after an unplanned hospital stay. It is not a document of the Policlinico di Milano and has not been approved by the hospital. No business listed paid to appear.","<b>Qui a écrit ce guide.</b> Des proches d'une patiente, après une hospitalisation non prévue. Ce n'est pas un document du Policlinico di Milano et il n'a pas été approuvé par l'hôpital. Aucun commerce cité n'a payé pour y figurer.","<b>من كتب هذا الدليل.</b> أقارب إحدى المريضات بعد دخول غير مخطط للمستشفى. ليس وثيقة صادرة عن Policlinico di Milano ولم يعتمده المستشفى. لم يدفع أي متجر مذكور مقابل ظهوره.","<b>本指南由谁撰写。</b>一位患者的家属，在一次计划外住院之后写成。本指南不是 Policlinico di Milano 的文件，也未经医院批准。所列商家均未付费。"],
+f2:["<b>Quanto è affidabile.</b> Orari di visita, Area C e trasporti vengono dai siti del Policlinico, del Comune di Milano e di ATM. Orari dei negozi e tempi a piedi sono indicativi. Per ogni dubbio vale quello che dice il personale del reparto.","<b>How reliable it is.</b> Visiting hours, Area C and transport come from the websites of the hospital, the City of Milan and ATM. Shop hours and walking times are indicative. If in doubt, what the ward staff say prevails.","<b>Fiabilité.</b> Horaires de visite, Area C et transports proviennent des sites de l'hôpital, de la Ville de Milan et d'ATM. Les horaires des commerces et les temps à pied sont indicatifs. En cas de doute, ce que dit le personnel du service prévaut.","<b>مدى الموثوقية.</b> مواعيد الزيارة والمنطقة C والمواصلات مأخوذة من مواقع المستشفى وبلدية ميلانو وATM. مواعيد المتاجر وأوقات السير تقريبية. عند الشك، يُعتمد ما يقوله طاقم القسم.","<b>可靠程度。</b>探视时间、Area C 和交通信息来自医院、米兰市政府和 ATM 官网。商店营业时间和步行时间仅供参考。如有疑问，以病房工作人员的说法为准。"],
+f3:["Fonti","Sources","Sources","المصادر","信息来源"],
+f4:["Ultimo aggiornamento: 14 novembre 2026.","Last updated: 14 November 2026.","Dernière mise à jour : 14 novembre 2026.","آخر تحديث: 14 نوفمبر 2026.","最后更新：2026年11月14日。"]
+};
+function P(n,a,m,q,h,d){return{n:n,a:a,m:m,q:q,h:h,d:d}}
+var PL={
+technor:P("Technor","Via Lamarmora 22",4,"Technor Via Alfonso Lamarmora 22 Milano",[["1","11–13, 15–18"],["2-5","9–13, 14:30–18:30"],["6","10–13"]],"d_technor"),
+foglia:P("Farmacia Foglia","Corso di Porta Romana 56",8,"Farmacia Foglia Corso di Porta Romana 56 Milano",[["1-7","8–24"]],"d_pharm"),
+ferr:P("Farmacia Ferrarini","Piazza Cinque Giornate 6",11,"Farmacia Ferrarini Piazza Cinque Giornate 6 Milano","24","d_pharm"),
+pam:P("Pam local","Via Carlo Freguglia 2",6,"Pam local Via Carlo Freguglia 2 Milano",[["1-6","8–21"],["7","9–14, 16–21"]],"d_super"),
+cx:P("Carrefour Express","Corso di Porta Vigentina 36",10,"Carrefour Express Corso di Porta Vigentina 36 Milano",[["1-6","8–22"],["7","9–21"]],"d_super"),
+cm:P("Carrefour Market","Via Bergamo 10",11,"Carrefour Market Via Bergamo 10 Milano",[["1-7","7–1"]],"d_super"),
+intim:P("Intimissimi","Corso di Porta Romana 54",9,"Intimissimi Corso di Porta Romana 54 Milano",[["1-6","10–19:30"],["7","15–19"]],"d_intim"),
+ovs:P("OVS","Via Lodovico Mancini 2/4",15,"OVS Via Lodovico Mancini 2 Milano",[["1-6","9:30–20"],["7","10–13:30, 15:30–19:30"]],"d_ovs"),
+ghe:P("Ghepost","Via Manfredo Fanti 2",2,"Ghepost Via Manfredo Fanti 2 Milano",[["1-6","6:30–21"]],"d_ghe"),
+sbar:P("Caffetteria San Barnaba","Via San Barnaba 18",3,"Cafeteria San Barnaba Via San Barnaba 18 Milano",[["1-5","6–20"],["6","7:30–16:30"]],"d_sbar"),
+pan:P("Panificio Pasticceria Cafe","Via della Commenda 19",3,"Panificio Pasticceria cafe Via della Commenda 19 Milano",[["1-6","7:30–20"]],"d_pan"),
+pave:P("Pavè Break","Via della Commenda 25",4,"Pavè Break Via della Commenda 25 Milano",[["1-7","7:30–16"]],"d_pave"),
+forno:P("Il Forno di via Commenda","Via della Commenda 21",3,"Il Forno di Via Commenda 21 Milano",[["1-5","6:30–19:30"],["6","6–16"]],"d_forno"),
+poke:P("Poke House","Via Carlo Freguglia 2",6,"Poke House Tribunale Via Carlo Freguglia 2 Milano",[["1-7","11:30–15:30"]],"d_poke"),
+viva:P("Viva BuonoFrescoNaturale","Largo della Crocetta 2",7,"Viva BuonoFrescoNaturale Largo della Crocetta 2 Milano",[["1-5","7–20"],["6","8–20"]],"d_viva"),
+cec:P("Focacceria Cecino","Via Lamarmora 22",4,"Focacceria Cecino Via Alfonso Lamarmora 22 Milano",[["1-5","12–20"],["6","12–16"]],"d_cec"),
+vg:P("Trattoria La Vecchia Guardia","Via della Commenda 21",3,"Trattoria la vecchia guardia Via della Commenda 21 Milano",[["2-7","12–14:30, 19:30–22:30"]],"d_vg"),
+ge:P("Gennaro Esposito","Via della Commenda 43",6,"Gennaro Esposito Via della Commenda 43 Milano",[["1-7","12–14:30, 19–23"]],"d_ge"),
+jj:P("Jamm Ja","Via Carlo Freguglia 2",6,"Jamm Ja Via Carlo Freguglia 2 Milano",[["1-7","12–15, 19–23"]],"d_jj"),
+cc:P("Casa Curci","Corso di Porta Romana 103",8,"Casa Curci Corso di Porta Romana 103 Milano",[["2-7","12–15, 19–23"]],"d_cc"),
+park:P("Autoparcheggio San Barnaba","Via San Barnaba 18",3,"Autoparcheggio San Barnaba Via San Barnaba 18 Milano","24","d_park"),
+park2:P("Parking Service","Via Manfredo Fanti 19",4,"Parking Service Via Manfredo Fanti 19 Milano","24","d_park2")
+};
+var li=0;
+function t(k){return S[k][li]}
+function ltr(x){return '<bdi dir="ltr">'+x+'</bdi>'}
+function hours(h){
+  if(h==="24")return t("h24");
+  return h.map(function(p){
+    var d=p[0],lab;
+    if(d==="1-7")lab=t("every");
+    else if(d.indexOf("-")>0){var a=d.split("-");lab=DAYS[li][a[0]-1]+"–"+DAYS[li][a[1]-1]}
+    else lab=DAYS[li][d-1];
+    return lab+" "+ltr(p[1]);
+  }).join(" · ");
+}
+function row(k){
+  var p=PL[k];
+  return '<li><b>'+ltr(p.n)+'</b><span class="w">'+p.m+' '+t("min")+'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.q)+'">'+t("map")+'</a></span><span class="d">'+t(p.d)+'</span><span class="h">'+ltr(p.a)+' · '+hours(p.h)+'</span></li>';
+}
+function rows(ks){return '<ul class="rows">'+ks.map(row).join("")+'</ul>'}
+function kv(pairs){return '<div class="kv">'+pairs.map(function(p){return '<div><span>'+p[0]+'</span><b>'+p[1]+'</b></div>'}).join("")+'</div>'}
+function ul(ks){return '<ul class="plain">'+ks.map(function(k){return '<li>'+t(k)+'</li>'}).join("")+'</ul>'}
+function sec(n,body){return '<section id="s'+n+'"><div class="label">'+n+'</div><h2>'+t("t"+n)+'</h2>'+body+'</section>'}
+function render(){
+  var h='';
+  h+='<div class="cover"><span class="tag">'+t("tag")+'</span><h1>'+t("h1")+'</h1><div class="bar"></div><p class="lead">'+t("lead")+'</p><p class="meta">'+t("meta")+'</p></div>';
+  h+='<ol class="index">';
+  for(var i=1;i<=10;i++)h+='<li><button type="button" data-go="s'+i+'"><b>'+i+'</b>'+t("t"+i)+'</button></li>';
+  h+='</ol>';
+  h+=sec(1,'<ol class="steps">'+["s1a","s1e","s1b","s1c","s1d","s1f"].map(function(k){return '<li><div>'+t(k)+'</div></li>'}).join("")+'</ol>');
+  h+=sec(2,'<p class="sub">'+t("s2sub")+'</p><h3>'+t("g_hyg")+'</h3><p>'+t("barin")+'</p>'+rows(["foglia","ferr"])+'<h3>'+t("g_slip")+'</h3>'+rows(["technor"])+'<h3>'+t("g_cloth")+'</h3>'+rows(["intim","ovs"])+'<h3>'+t("g_water")+'</h3>'+rows(["pam","cx","cm"])+'<p class="sub" style="margin-top:10px">'+t("n_pharm")+'</p>');
+  h+=sec(3,'<p class="sub">'+t("s3sub")+'</p><h3>'+t("g_caf")+'</h3>'+rows(["ghe","sbar","pan","pave"])+'<h3>'+t("g_quick")+'</h3>'+rows(["forno","poke","viva"])+'<h3>'+t("g_veg")+'</h3>'+rows(["cec"])+'<h3>'+t("g_sit")+'</h3>'+rows(["vg","ge","jj","cc"])+'<div class="note">'+t("n_food")+'</div>');
+  h+=sec(4,ul(["s4a","s4b","s4c","s4d"]));
+  h+=sec(5,'<p>'+t("s5what")+'</p>'+kv([[t("k_on"),t("v_on")],[t("k_tk"),ltr("7,50 €")],[t("k_dl"),t("v_dl")],[t("k_gr"),ltr("4,50 €")],[t("k_lt"),ltr("22,50 €")]])+'<p>'+t("s5pay")+'</p><div class="note">'+t("s5fine")+'</div><div class="note">'+t("s5ex")+'</div><p>'+t("s5ban")+'</p><h3>'+t("g_park")+'</h3>'+rows(["park","park2"])+'<p style="margin-top:10px">'+t("s5next")+'</p>');
+  h+=sec(6,ul(["s6a","s6b","s6c","s6d","s6e","s6f"]));
+  h+=sec(7,'<p class="sub">'+t("s7sub")+'</p>'+kv([["Linate",t("r_lin")],["Malpensa",t("r_mxp")],["Orio al Serio (Bergamo)",t("r_bgy")],[t("n_cen"),t("r_cen")],[t("n_cad"),t("r_cad")]])+'<p><a href="https://www.malpensaexpress.it">malpensaexpress.it</a> · <a href="https://www.atm.it">atm.it</a></p>');
+  h+=sec(8,ul(["s8a","s8b","s8c"])+'<p><a href="https://www.acasalontanidacasa.it">acasalontanidacasa.it</a></p>');
+  h+=sec(9,'<p class="sub">'+t("s9sub")+'</p>'+kv([[t("k_gen"),t("v_gen")],[t("k_pue"),ltr("8–20")],[t("k_fam"),t("v_fam")],[t("k_neo"),t("v_neo")],[t("k_kid"),t("v_kid")]])+'<p>'+t("s9val")+'</p>');
+  h+=sec(10,kv([[t("k_112"),ltr("112")],[t("k_sw"),ltr("02 5503.1")],[t("k_mr"),ltr("02 5503.2455")],[t("k_ac"),ltr("02 4868 4001")],[t("k_atm"),ltr("02 48 607 607")],[t("k_taxi"),ltr("02 4040")+" · "+ltr("02 6969")+"<br>"+ltr("02 8585")+" · "+ltr("02 7777")]])+'<p>'+t("s10ps")+'</p>');
+  h+='<footer><p>'+t("f1")+'</p><p>'+t("f2")+'</p><p>'+t("f3")+': <a href="https://www.policlinico.mi.it/servizi-al-paziente/ricovero-e-orari-visita">policlinico.mi.it</a> · <a href="https://www.comune.milano.it/servizi/mobilita/area-c-agevolazioni-per-motivi-di-salute">comune.milano.it</a> · <a href="https://www.atm.it">atm.it</a></p><p>'+t("f4")+'</p></footer>';
+  document.getElementById("app").innerHTML=h;
+  var L=LANGS[li];
+  document.documentElement.lang=L;
+  document.documentElement.dir=(L==="ar")?"rtl":"ltr";
+  document.title=t("h1");
+  var lb='';
+  for(var j=0;j<LANGS.length;j++)lb+='<button type="button" data-lang="'+j+'" lang="'+LANGS[j]+'" aria-pressed="'+(j===li)+'">'+LNAME[j]+'</button>';
+  document.getElementById("langs").innerHTML=lb;
+}
+function pick(){
+  var hsh=(location.hash||"").replace("#","");
+  var i=LANGS.indexOf(hsh);
+  if(i>=0)return i;
+  try{var s=localStorage.getItem("guida-lang");i=LANGS.indexOf(s);if(i>=0)return i}catch(e){}
+  var n=(navigator.language||"it").slice(0,2).toLowerCase();
+  i=LANGS.indexOf(n);
+  return i>=0?i:0;
+}
+document.addEventListener("click",function(e){
+  var b=e.target.closest("button");
+  if(!b)return;
+  if(b.dataset.lang!==undefined){
+    li=+b.dataset.lang;
+    try{localStorage.setItem("guida-lang",LANGS[li])}catch(err){}
+    render();
+  }else if(b.dataset.go){
+    var el=document.getElementById(b.dataset.go);
+    if(el)el.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+  }
+});
+window.addEventListener("hashchange",function(){li=pick();render()});
+li=pick();
+render();
+</script>
+</body>
+</html>
